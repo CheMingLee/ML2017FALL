@@ -1,17 +1,14 @@
 import sys
 
-fileName = sys.argv[1]
+with open(sys.argv[1], 'r') as f:
+    lines = f.read().rstrip('\n').split(' ')
 
-f = open(fileName, 'r')
-lines = f.read().rstrip('\n').split(' ')
-newLst = []
-output = open('Q1.txt', 'w')
-for i in lines:
-    if i not in newLst:
-        newLst.append(i)
-        indx = newLst.index(i)
-        con = lines.count(i)
-        output.write('{0} {1} {2}\n'.format(i, indx, con))
 
-f.close()
-output.close()
+with open('Q1.txt', 'w') as of:
+    newList = []
+    for word in lines:
+        if word not in newList:
+            newList.append(word)
+            indx = newList.index(word)
+            con = lines.count(word)
+            of.write('{0} {1} {2}\n'.format(word, indx, con))
