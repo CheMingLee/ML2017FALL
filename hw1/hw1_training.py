@@ -50,7 +50,7 @@ X = np.concatenate((np.ones((X.shape[0],1)),X), axis=1)
 w = np.zeros(len(X[0]))
 l_rate = 10
 repeat = 10000
-lamda = 1e-1
+lamda = 0
 x_t = X.transpose()
 s_gra = np.zeros(len(X[0]))
 
