@@ -22,9 +22,8 @@ Xtest = np.concatenate((Xtest,Xtest**2), axis=1)
 # add bias
 Xtest = np.concatenate((np.ones((Xtest.shape[0],1)),Xtest), axis=1)
 
+# output
 result = np.dot(Xtest,w)
-
-# result = Bias+np.dot(Xtest,Weight)
 result = pd.DataFrame(result)
 result.columns = ['value']
 outputFile = index_result.join(result)
