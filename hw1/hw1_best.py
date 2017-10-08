@@ -8,7 +8,7 @@ output_file = sys.argv[2]
 variables = 9
 
 # read model
-w = np.load('PM25SquareCloseForm.npy')
+w = np.load('PM25SquareLamda0.npy')
 
 tData = pd.read_csv(intput_file, encoding='big5', names=range(11))
 T = tData[tData[1] == 'PM2.5']
