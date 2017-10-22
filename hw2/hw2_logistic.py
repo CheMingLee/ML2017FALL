@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import scipy as cp
 from math import floor
 import sys
 
@@ -84,13 +83,13 @@ def train(X_all, Y_all):
     fnumber = len(X_train[0])
     w = np.zeros(fnumber)
     b = 0
-    l_rate = 10
+    l_rate = 1
     b_lr = 0
     w_lr = np.zeros(fnumber)
     batch_size = len(X_train)
     train_data_size = len(X_train)
     step_num = int(floor(train_data_size / batch_size))
-    epoch_num = int(4e3+1)
+    epoch_num = int(1e4+1)
     save_param_iter = int(1e3)
 
     # Start training
