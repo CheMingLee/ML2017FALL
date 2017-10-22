@@ -66,71 +66,65 @@ def sigmoid(z):
     res = 1 / (1.0 + np.exp(-z))
     return np.clip(res, 1e-11, 1-(1e-11))
 
-def valid(w, b, X_valid, Y_valid):
-    valid_data_size = len(X_valid)
-    z = (np.dot(X_valid, np.transpose(w)) + b)
-    y = sigmoid(z)
+def valid(X_valid, Y_valid, mu1, mu2, shared_sigma, N1, N2):
+    sigma_inverse = np.linalg.inv(shared_sigma)
+    w = np.dot( (mu1-mu2), sigma_inverse)
+    x = X_valid.T
+    b = (-0.5) * np.dot(np.dot([mu1], sigma_inverse), mu1) + (0.5) * np.dot(np.dot([mu2], sigma_inverse), mu2) + np.log(float(N1)/N2)
+    a = np.dot(w, x) + b
+    y = sigmoid(a)
     y_ = np.around(y)
     result = (np.squeeze(Y_valid) == y_)
-    print('Validation acc = %f' % (float(result.sum()) / valid_data_size))
+    print('Valid acc = %f' % (float(result.sum()) / result.shape[0]))
 
 def train(X_all, Y_all):
     # Split a 10%-validation set from the training set
     valid_set_percentage = 0.1
     X_train, Y_train, X_valid, Y_valid = split_valid_set(X_all, Y_all, valid_set_percentage)
-
-    # Initiallize parameter, hyperparameter
-    fnumber = len(X_train[0])
-    w = np.zeros(fnumber)
-    b = 0
-    l_rate = 1
-    b_lr = 0
-    w_lr = np.zeros(fnumber)
-    batch_size = len(X_train)
-    train_data_size = len(X_train)
-    step_num = int(floor(train_data_size / batch_size))
-    epoch_num = int(1e4+1)
-    save_param_iter = int(1e3)
-
-    # Start training
-    total_loss = 0.0
-    for epoch in range(1, epoch_num):
-        # Do validation
-        if (epoch) % save_param_iter == 0:
-            print('=====Param at epoch %d=====' % epoch)
-            print('epoch avg loss = %f' % (total_loss / (float(save_param_iter) * train_data_size)))
-            total_loss = 0.0
-            valid(w, b, X_valid, Y_valid)
-        
-        # Random shuffle
-        X_train, Y_train = _shuffle(X_train, Y_train)
-
-        # Train with batch
-        for idx in range(step_num):
-            X = X_train[idx*batch_size:(idx+1)*batch_size]
-            Y = Y_train[idx*batch_size:(idx+1)*batch_size]
-
-            z = np.dot(X, w) + b
-            y = sigmoid(z)
-
-            cross_entropy = -1 * (np.dot(np.squeeze(Y), np.log(y)) + np.dot((1 - np.squeeze(Y)), np.log(1 - y)))
-            total_loss += cross_entropy
-
-            w_grad = -np.dot(X.T, (np.squeeze(Y) - y))
-            b_grad = -np.sum(np.squeeze(Y)-y)
-
-            # adagrad
-            b_lr += b_grad**2
-            w_lr += w_grad**2
-            w = w - l_rate/np.sqrt(w_lr) * w_grad
-            b = b - l_rate/np.sqrt(b_lr) * b_grad
     
-    return w, b
+    # Gaussian distribution parameters
+    train_data_size = X_train.shape[0]
+    cnt1 = 0
+    cnt2 = 0
 
-def infer(X_test, w, b, output_path):
-    # predict
-    z = np.dot(X_test, w) + b
-    y = sigmoid(z)
+    mu1 = np.zeros((106,))
+    mu2 = np.zeros((106,))
+    for i in range(train_data_size):
+        if Y_train[i] == 1:
+            mu1 += X_train[i]
+            cnt1 += 1
+        else:
+            mu2 += X_train[i]
+            cnt2 += 1
+    mu1 /= cnt1
+    mu2 /= cnt2
+
+    sigma1 = np.zeros((106,106))
+    sigma2 = np.zeros((106,106))
+    for i in range(train_data_size):
+        if Y_train[i] == 1:
+            sigma1 += np.dot(np.transpose([X_train[i] - mu1]), [(X_train[i] - mu1)])
+        else:
+            sigma2 += np.dot(np.transpose([X_train[i] - mu2]), [(X_train[i] - mu2)])
+    sigma1 /= cnt1
+    sigma2 /= cnt2
+    shared_sigma = (float(cnt1) / train_data_size) * sigma1 + (float(cnt2) / train_data_size) * sigma2
+    N1 = cnt1
+    N2 = cnt2
+    
+    print('=====Validating=====')
+    valid(X_valid, Y_valid, mu1, mu2, shared_sigma, N1, N2)
+
+    return mu1, mu2, shared_sigma, N1, N2
+
+def infer(X_test, mu1, mu2, shared_sigma, N1, N2, output_path):
+    # Predict
+    sigma_inverse = np.linalg.inv(shared_sigma)
+    w = np.dot( (mu1-mu2), sigma_inverse)
+    x = X_test.T
+    b = (-0.5) * np.dot(np.dot([mu1], sigma_inverse), mu1) + (0.5) * np.dot(np.dot([mu2], sigma_inverse), mu2) + np.log(float(N1)/N2)
+    a = np.dot(w, x) + b
+    y = sigmoid(a)
     y_ = np.around(y)
 
     with open(output_path, 'w') as f:
@@ -146,5 +140,5 @@ X_all, Y_all, X_test = load_data(train_data_path, train_label_path, test_data_pa
 X_all, X_test = Rescaling(X_all, X_test)
 
 # train and infer
-w, b = train(X_all, Y_all)
-infer(X_test, w, b, output_path)
+mu1, mu2, shared_sigma, N1, N2 = train(X_all, Y_all)
+infer(X_test, mu1, mu2, shared_sigma, N1, N2, output_path)
