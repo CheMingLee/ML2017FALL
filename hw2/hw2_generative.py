@@ -58,7 +58,7 @@ def split_valid_set(X_all, Y_all, percentage):
 
 def sigmoid(z):
     res = 1 / (1.0 + np.exp(-z))
-    return np.clip(res, 1e-8, 1-(1e-8))
+    return np.clip(res, 1e-10, 1-(1e-10))
 
 def valid(X_valid, Y_valid, mu1, mu2, shared_sigma, N1, N2):
     sigma_inverse = np.linalg.inv(shared_sigma)
@@ -123,9 +123,9 @@ def infer(X_test, mu1, mu2, shared_sigma, N1, N2, output_path):
 
 X_all, Y_all, X_test = load_data(train_data_path, train_label_path, test_data_path)
 # Standardization
-# X_all, X_test = normalize(X_all, X_test)
+X_all, X_test = normalize(X_all, X_test)
 # Rescaling
-X_all, X_test = Rescaling(X_all, X_test)
+# X_all, X_test = Rescaling(X_all, X_test)
 # train and infer
 mu1, mu2, shared_sigma, N1, N2 = train(X_all, Y_all)
 infer(X_test, mu1, mu2, shared_sigma, N1, N2, output_path)
