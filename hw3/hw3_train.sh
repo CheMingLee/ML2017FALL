@@ -1,1 +1,1 @@
-python hw3_test.py $1
+python hw3_train.py $1

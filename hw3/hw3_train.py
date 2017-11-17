@@ -136,6 +136,5 @@ model.summary()
 
 # fit
 EarlyStopping(monitor='val_loss', patience=5, mode='auto')
-acc_his = model.fit_generator(datagen.flow(Xtr, Ytr, batch_size=128), steps_per_epoch=Xtr.shape[0]/128, epochs=150, validation_data=(Xval, Yval))
-mdhis = pd.DataFrame(acc_his.history).to_csv('CNN_DataGen_history2.csv')
+model.fit_generator(datagen.flow(Xtr, Ytr, batch_size=128), steps_per_epoch=Xtr.shape[0]/128, epochs=150, validation_data=(Xval, Yval))
 model.save('model.h5')
