@@ -78,9 +78,9 @@ for i in range(len(y_ans)):
     else:
         y_ans[i]=1
 
-x_id = np.append(['id'], x_id)
-y_ans = np.append(['label'], y_ans)
-df = pd.DataFrame(y_ans, x_id)
-df.to_csv(res_path, header=None)
+with open(res_path, 'w') as f:
+        f.write('id,label\n')
+        for i, v in  enumerate(y_ans):
+            f.write('%d,%d\n' %(i, v)) 
 
 print('Finish!')
