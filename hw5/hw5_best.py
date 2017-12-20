@@ -3,6 +3,7 @@ import pandas as pd
 from keras.layers import Input, Embedding, Flatten, Dot, Add, Concatenate, Dense, Dropout
 from keras.models import Model
 from keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
+import sys
 
 def nn_model(n_users, n_items, latent_dim):
     user_input = Input(shape=[1])
