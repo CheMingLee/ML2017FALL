@@ -1,2 +1,2 @@
 #!/bin/bash
-python pca.py $1 $2 
+python3 pca.py $1 $2 
