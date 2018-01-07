@@ -6,11 +6,9 @@ import os
 imgs_path = sys.argv[1]
 img = sys.argv[2]
 
-os.chdir(imgs_path)
-
 all_imgs = []
 for i in range(415):
-	image = io.imread('{0}.jpg'.format(i))
+	image = io.imread(os.path.join(imgs_path, '{0}.jpg'.format(i)))
 	all_imgs.append(image.flatten())
 
 all_imgs = np.array(all_imgs, dtype=np.float)
@@ -19,7 +17,7 @@ X = all_imgs.T
 X_mean = np.mean(X, axis=0)
 U, s, V = np.linalg.svd(X - X_mean, full_matrices=False)
 
-image = io.imread(img)
+image = io.imread(os.path.join(imgs_path, img))
 orgi_shape = np.shape(image)
 image = np.array(image.flatten(), dtype=np.float)
 
